@@ -1,12 +1,20 @@
 import React from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Dashboard from './pages/Dashboard.jsx'
+import SignIn from './pages/SignIn.jsx'
+import SignUp from './pages/SignUp.jsx'
+import SendMoney from './pages/SendMoney.jsx'
+import './App.css'
 function App() {
-
   return (
-    <div>
-      <h2 className ='text-3xl font-bold underline'>
-        Hello world
-      </h2>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path='/signin' element={<SignIn />}></Route>
+        <Route path='/signup' element={<SignUp />}></Route>
+        <Route path='/dashboard' element={<Dashboard />}></Route>
+        <Route path='/transfer' element={<SendMoney />}></Route>
+      </Routes>
+    </BrowserRouter>
   )
 }
 
