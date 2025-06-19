@@ -7,6 +7,10 @@ import { BottomWarning } from '../components/BottomWarning.jsx'
 
 
 const SignIn = () => {
+  const handleClick = (e) =>{
+    e.prevent.default()
+
+  }
   return (
     <div className='h-screen w-screen bg-slate-400 flex justify-center'>
                <div className='flex flex-col justify-center'>
@@ -15,7 +19,7 @@ const SignIn = () => {
                        <SubHeading content={"Enter your information to Login"} />
                        <InputBox title={"Username"} placeholder={"hritik@gmail.com"} type={"text"} />
                        <InputBox title={"Password"} placeholder={"********"} type={"password"} />
-                       <Button title={"Sign In"} />
+                       <Button title={"Sign In"} onClick = {handleClick}  />
                        <BottomWarning label={"Don't have an account?"} buttonText={"Sign Up"} target={"/signup"} />
                    </div>
                </div>
