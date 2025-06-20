@@ -8,6 +8,7 @@ const getBalance = async(req, res)=>{
             userId: req.userId
         }) 
         res.status(200).json({
+            amount: userAccount.balance,
             message: `Your current balance is ₹${userAccount.balance}`
         })
     }

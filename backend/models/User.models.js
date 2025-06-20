@@ -48,7 +48,8 @@ userSchema.methods.isPasswordValid = async function (password) {
 userSchema.methods.generateJWTToken = function () {
     return jwt.sign({
         _id: this._id,
-        username: this.username
+        username: this.username,
+        firstName: this.firstName
     },
         JWT_SECRET_KEY,
         { expiresIn: '2D' }

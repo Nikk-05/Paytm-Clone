@@ -16,33 +16,40 @@ const updateSchema = z.object({
 })
 
 const userSignUp = async (req, res) => {
-    const body = req.body
-    const validatedData = signupInputValidation.safeParse(req.body)
-    if (!validatedData.success) {
-        return res.json({
-            message: "Email already taken/Incorrect input"
+    try {
+        const body = req.body
+        const validatedData = signupInputValidation.safeParse(req.body)
+        if (!validatedData.success) {
+            return res.status(400).json({
+                message: "Validation failed",
+                errors: validatedData.error.errors
+            })
+        }
+
+        const existingUser = await User.findOne({
+            username: body.username
+        })
+        if (existingUser._id) {
+            return res.status(403).json({
+                message: "Email already present. Please SignIn"
+            })
+        }
+
+        const newUser = await User.create(body)
+        const balance = Math.floor(Math.random() * 1000) + 1
+        await Account.create({
+            userId: newUser._id,
+            balance: balance
+        })
+        const token = newUser.generateJWTToken()
+        return res.status(200).json({
+            access_token: token,
+            message: "User created successfully"
         })
     }
-
-    const existingUser = User.findOne({
-        username: body.username
-    })
-    if (existingUser._id) {
-        return res.json({
-            message: "Email already present. Please SignIn"
-        })
+    catch (error) {
+        return res.status(500).json({ message: "Server error", error: error.message });
     }
-
-    const newUser = await User.create(body)
-    const balance = Math.floor(Math.random() * 1000) + 1
-    await Account.create({
-        userId: newUser._id,
-        balance: balance
-    })
-
-    return res.status(200).json({
-        message: "User created successfully"
-    })
 }
 
 const userSignIn = async (req, res) => {
@@ -80,7 +87,7 @@ const userUpdate = async (req, res, next) => {
 
         return res.status(200).json({
             message: "User data updated",
-            data: updatedUser
+            user: updatedUser
         })
     }
     catch (error) {
@@ -91,18 +98,29 @@ const userUpdate = async (req, res, next) => {
 }
 
 const usersList = async (req, res, next) => {
-    const filter = req.query.filter || "";
-    const users = await User.find({
-        $or: [{
-            firstName: {
-                $regex: filter
-            }
-        }, {
-            lastName: {
-                $regex: filter
-            }
-        }]
-    })
+    const filter = req.query.filter
+    let users;
+    if (!filter) {
+        users = await User.find({
+            _id: { $ne: req.userId }
+        })
+    }
+    else {
+        users = await User.find({
+            _id: { $ne: req.userId },
+            $or: [{
+                firstName: {
+                    $regex: filter,
+                    $options: 'i' //case-insensitive
+                }
+            }, {
+                lastName: {
+                    $regex: filter,
+                    $options: 'i' //case-insensitive
+                }
+            }]
+        })
+    }
     res.status(200).json({
         user: users.map(user => ({
             username: user.username,
@@ -113,7 +131,10 @@ const usersList = async (req, res, next) => {
     })
 }
 
+const userSignOut = async (req, res) => {
+    return res.status(200).json({
+        message: "User signed out successfully"
+    });
+};
 
-
-
-export { userSignIn, userSignUp, userUpdate, usersList}
+export { userSignIn, userSignUp, userUpdate, usersList, userSignOut }
